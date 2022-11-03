@@ -1,0 +1,11 @@
+.*
+!.gitignore
+
+# rust dev assets
+target/
+
+# nodejs dev assets
+node_modules/
+
+# JS will be compiled from .ts
+frontend/web-folder/js
