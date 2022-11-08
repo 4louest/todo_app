@@ -1,23 +1,24 @@
 use super::db::Db;
 use crate::{model, security::UserCtx};
+use serde::{Deserialize, Serialize};
 use sqlb::{HasFields, Raw};
 
 // region:  Todo Types
-#[derive(sqlx::FromRow, Debug, Clone)]
+#[derive(sqlx::FromRow, Debug, Clone, Serialize, Deserialize)]
 pub struct Todo {
-    id: i64,
-    cid: i64,
-    title: String,
-    status: TodoStatus,
+    pub id: i64,
+    pub cid: i64,
+    pub title: String,
+    pub status: TodoStatus,
 }
 
-#[derive(sqlb::Fields, Default, Debug, Clone)]
+#[derive(sqlb::Fields, Default, Debug, Clone, Serialize, Deserialize)]
 pub struct TodoPatch {
-    title: Option<String>,
-    status: Option<TodoStatus>,
+    pub title: Option<String>,
+    pub status: Option<TodoStatus>,
 }
 
-#[derive(sqlx::Type, Debug, Clone, PartialEq, Eq)]
+#[derive(sqlx::Type, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[sqlx(type_name = "todo_status_enum")]
 #[sqlx(rename_all = "lowercase")]
 pub enum TodoStatus {
@@ -35,10 +36,11 @@ impl TodoMac {
     const COLUMNS: &'static [&'static str] = &["id", "cid", "title", "status"];
 }
 
+/// Todo Model access controllers
 impl TodoMac {
     pub async fn create(db: &Db, utx: &UserCtx, data: TodoPatch) -> Result<Todo, model::Error> {
         let mut fields = data.fields();
-        fields.push(("cid", 123).into());
+        fields.push(("cid", utx.user_id).into());
 
         let sb = sqlb::insert()
             .table(Self::TABLE)
@@ -81,7 +83,7 @@ impl TodoMac {
         handle_fetch_one_result(result, Self::TABLE, id)
     }
 
-    pub async fn list(db: &Db, utx: &UserCtx) -> Result<Vec<Todo>, model::Error> {
+    pub async fn list(db: &Db, _utx: &UserCtx) -> Result<Vec<Todo>, model::Error> {
         let sb = sqlb::select()
             .table(Self::TABLE)
             .columns(Self::COLUMNS)
@@ -120,5 +122,3 @@ fn handle_fetch_one_result(
 #[cfg(test)]
 #[path = "../_tests/model_todo.rs"]
 mod tests;
-
-// VID https://youtu.be/VIig9IcQ-w8?t=1533
