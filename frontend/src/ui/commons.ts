@@ -10,8 +10,8 @@ class Ico extends BaseHTMLElement {
         const name = this.getAttribute("name")?.trim();
 
         const htmlContent = html`<svg class="symbol">
-    	<use xlink:href="#${name}"></use>
-    </svg>`;
+            <use xlink:href="#${name}"></use>
+        </svg>`;
         this.append(htmlContent);
     }
 }

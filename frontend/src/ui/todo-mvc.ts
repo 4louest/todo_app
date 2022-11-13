@@ -1,4 +1,4 @@
-import { BaseHTMLElement, customElement, html, getChild, getChildren, onEvent, OnEvent, onHub, first } from 'dom-native';
+import { BaseHTMLElement, customElement, html, getChild, getChildren, onEvent, OnEvent, onHub, first, adoptStyleSheets } from 'dom-native';
 import { Todo, todoMco } from 'src/model/todo-mco';
 
 @customElement("todo-mvc")
@@ -41,6 +41,13 @@ class TodoMvc extends BaseHTMLElement {
         // update to server
         todoMco.update(todoItem.data.id, { status });
     }
+
+    @onEvent('pointerup', 'c-ico.del')
+    onDeleteTodo(evt: PointerEvent & OnEvent) {
+        const todoItem = evt.selectTarget.closest("todo-item")!;
+        // update to server
+        todoMco.delete(todoItem.data.id);
+    }
     // #endregion --- UI Events
 
     // #region    --- Data Events
@@ -56,6 +63,11 @@ class TodoMvc extends BaseHTMLElement {
 
     @onHub('dataHub', 'Todo', 'create')
     onTodoCreate(data: Todo) {
+        this.refresh();
+    }
+
+    @onHub('dataHub', 'Todo', 'delete')
+    onTodoDelete(data: Todo) {
         this.refresh();
     }
     // #endregion --- Data Events
@@ -116,7 +128,7 @@ export class TodoItem extends BaseHTMLElement { // extends HTMLElement
         let htmlContent = html`
                 <c-check><c-ico name="ico-done"></c-ico></c-check>
                 <div class="title">STATIC TITLE</div>
-                <c-ico name="del"></c-ico>        
+                <c-ico name="ico-del" class="del"></c-ico>        
         `;
         this.#titleEl = getChild(htmlContent, 'div');
 
